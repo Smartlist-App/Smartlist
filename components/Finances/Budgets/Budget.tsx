@@ -1,20 +1,20 @@
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import Typography from "@mui/material/Typography";
-import LinearProgress from "@mui/material/LinearProgress";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
-import { useState, useEffect } from "react";
-import SwipeableDrawer from "@mui/material/SwipeableDrawer";
-import { Puller } from "../../Puller";
-import useFetch from "react-fetch-hook";
-import dayjs from "dayjs";
 import Card from "@mui/material/Card";
-import { neutralizeBack, revivalBack } from "../../history-control";
 import CardContent from "@mui/material/CardContent";
+import IconButton from "@mui/material/IconButton";
+import LinearProgress from "@mui/material/LinearProgress";
+import ListItem from "@mui/material/ListItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Skeleton from "@mui/material/Skeleton";
+import SwipeableDrawer from "@mui/material/SwipeableDrawer";
+import Typography from "@mui/material/Typography";
+import dayjs from "dayjs";
+import { useEffect, useState } from "react";
+import useFetch from "react-fetch-hook";
+import { neutralizeBack, revivalBack } from "../../history-control";
+import { Puller } from "../../Puller";
 
 function Expenses({ category }: any) {
   const url =
@@ -29,8 +29,9 @@ function Expenses({ category }: any) {
   return (
     <>
       {isLoading ? (
-        [...new Array(10)].map(() => (
+        [...new Array(10)].map((_: any, id: number) => (
           <Skeleton
+            key={id.toString()}
             variant="rectangular"
             height={100}
             width={150}
@@ -59,12 +60,12 @@ function Expenses({ category }: any) {
                   <CardContent>
                     <Typography
                       gutterBottom
-                      sx={{ fontWeight: "600" }}
+                      sx={{ fontWeight: "500" }}
                       variant="h6"
                     >
                       {transaction.name}
                     </Typography>
-                    <Typography>
+                    <Typography sx={{ fontWeight: "15px" }}>
                       ${transaction.amount}, {dayjs(transaction.date).fromNow()}
                     </Typography>
                   </CardContent>
@@ -179,11 +180,11 @@ export function Budget({
         }}
         onClose={() => setOpen(false)}
       >
-        <Box sx={{ p: 1, display: { sm: "none" } }}>
+        <Box sx={{ display: { sm: "none" } }}>
           <Puller />
         </Box>
         <Box sx={{ p: 4 }}>
-          <Typography variant="h4" gutterBottom sx={{ fontWeight: "800" }}>
+          <Typography variant="h4" gutterBottom sx={{ fontWeight: "700" }}>
             {category}
           </Typography>
           <Typography variant="h5" sx={{ mb: 2 }}>

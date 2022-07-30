@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import CommandPalette from "react-command-palette";
+import { useHotkeys } from "react-hotkeys-hook";
 
 function atomCommand(suggestion: any) {
   const { name, shortcut } = suggestion;
@@ -15,6 +16,19 @@ function atomCommand(suggestion: any) {
 export function SearchPopup({ content }: any) {
   const router = useRouter();
   const [ready, setReady] = useState<boolean>(false);
+  useHotkeys("ctrl+/", (e) => {
+    e.preventDefault();
+    document.getElementById("searchTrigger1")!.click();
+  });
+  useHotkeys("ctrl+k", (e) => {
+    e.preventDefault();
+    document.getElementById("searchTrigger1")!.click();
+  });
+  useHotkeys("ctrl+f", (e) => {
+    e.preventDefault();
+    document.getElementById("searchTrigger1")!.click();
+  });
+
   const [commands, setCommands] = useState([
     {
       name: "Dashboard",
@@ -23,10 +37,6 @@ export function SearchPopup({ content }: any) {
     {
       command: () => router.push("/finances"),
       name: "Finances",
-    },
-    {
-      command: () => router.push("/planner"),
-      name: "Planner",
     },
     {
       command: () => router.push("/dashboard"),
@@ -43,14 +53,6 @@ export function SearchPopup({ content }: any) {
     {
       command: () => router.push("/dashboard"),
       name: "Starred",
-    },
-    {
-      command: () => router.push("/home-maintenance"),
-      name: "Home maintenance",
-    },
-    {
-      command: () => router.push("/rooms/kitchen"),
-      name: "Create list",
     },
     {
       command: () => router.push("/rooms/kitchen"),
@@ -104,12 +106,15 @@ export function SearchPopup({ content }: any) {
     },
   ]);
   if (!ready) {
-    fetch("https://api.smartlist.tech/v2/rooms/", {
-      method: "POST",
-      body: new URLSearchParams({
-        token: global.session.accessToken,
-      }),
-    })
+    fetch(
+      "/api/rooms?" +
+        new URLSearchParams({
+          token: global.session.accessToken,
+        }),
+      {
+        method: "POST",
+      }
+    )
       .then((res) => res.json())
       .then((res) => {
         setCommands([

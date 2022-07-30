@@ -1,33 +1,35 @@
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import * as colors from "@mui/material/colors";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import Chip from "@mui/material/Chip";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItem from "@mui/material/ListItem";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import React, { useEffect, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
+import { neutralizeBack, revivalBack } from "../history-control";
 import AccountSettings from "./AccountSettings";
 import App from "./App";
+import AppearanceSettings from "./AppearanceSettings";
 import Developer from "./Developer";
+import FinanceSettings from "./FinanceSettings";
+import TwoFactorAuth from "./TwoFactorAuth";
 import Notifications from "./Notifications";
 import Rooms from "./Rooms";
 import Sync from "./Sync";
-import AppearanceSettings from "./AppearanceSettings";
-import FinanceSettings from "./FinanceSettings";
-import Sessions from "./Sessions";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
-import { neutralizeBack, revivalBack } from "../history-control";
 
 function Logout() {
   const [open, setOpen] = useState<boolean>(false);
@@ -39,6 +41,7 @@ function Logout() {
           setOpen(false);
         }}
         PaperProps={{
+          elevation: 0,
           sx: {
             width: "450px",
             maxWidth: "calc(100vw - 20px)",
@@ -134,14 +137,15 @@ function SettingsMenu({ content, icon, primary, secondary }: any) {
             ? "rgb(64, 64, 64)"
             : global.theme === "dark"
             ? "hsl(240, 11%, 35%)"
-            : "#eee"
+            : colors[themeColor][100]
           : window.innerWidth > 900
-          ? "#808080"
+          ? "#cccccc"
           : global.theme === "dark"
           ? "hsl(240, 11%, 25%)"
-          : "#eee"
+          : colors[themeColor][100]
       );
   });
+
   return (
     <>
       <ListItem
@@ -190,7 +194,10 @@ function SettingsMenu({ content, icon, primary, secondary }: any) {
         onOpen={() => setOpen(true)}
         onClose={() => setOpen(false)}
         PaperProps={{
+          elevation: 0,
+
           sx: {
+            background: colors[themeColor][100],
             ...(global.theme === "dark" && {
               background: "hsl(240, 11%, 20%)",
             }),
@@ -216,7 +223,7 @@ function SettingsMenu({ content, icon, primary, secondary }: any) {
               background:
                 global.theme === "dark"
                   ? "hsl(240, 11%, 25%)"
-                  : "rgba(230,230,230,.5)",
+                  : colors[themeColor][100],
               backdropFilter: "blur(10px)",
               py: 1,
               color: global.theme === "dark" ? "#fff" : "#000",
@@ -271,32 +278,40 @@ export default function FullScreenDialog({ children }: any) {
         "content",
         open
           ? window.innerWidth < 992
-            ? global.theme === "darl"
+            ? global.theme === "dark"
               ? "hsl(240, 11%, 20%)"
               : "rgb(230,230,230)"
-            : "#808080"
+            : colors[themeColor][50]
           : "hsl(240, 11%, 10%)"
       );
   });
-
+  useHotkeys("ctrl+,", (e) => {
+    e.preventDefault();
+    document.getElementById("settingsTrigger")!.click();
+  });
   return (
     <div>
-      <div onClick={handleClickOpen}>{children}</div>
+      <div id="settingsTrigger" onClick={handleClickOpen}>
+        {children}
+      </div>
 
       <SwipeableDrawer
         anchor="right"
         swipeAreaWidth={0}
         onOpen={handleClickOpen}
         PaperProps={{
+          elevation: 0,
           sx: {
-            ...(global.theme === "dark" && {
-              background: "hsl(240, 11%, 15%)",
-            }),
-            maxWidth: "100vw",
+            background: colors[themeColor][50],
             width: {
-              xs: "100vw",
-              sm: "40vw",
+              sm: "50vw",
             },
+            maxWidth: "600px",
+            borderRadius: "30px 30px 0 0",
+            mx: "auto",
+            ...(global.theme === "dark" && {
+              background: "hsl(240, 11%, 25%)",
+            }),
           },
         }}
         ModalProps={{
@@ -313,7 +328,7 @@ export default function FullScreenDialog({ children }: any) {
               background:
                 global.theme === "dark"
                   ? "hsl(240, 11%, 20%)"
-                  : "rgba(255,255,255,.5)",
+                  : colors[themeColor][50],
               backdropFilter: "blur(10px)",
               py: 1,
               color: global.theme === "dark" ? "#fff" : "#000",
@@ -341,7 +356,7 @@ export default function FullScreenDialog({ children }: any) {
             </Toolbar>
           </AppBar>
           <Typography
-            sx={{ ml: 4, flex: 1, fontWeight: "600", my: 5 }}
+            sx={{ ml: 4, flex: 1, fontWeight: "400", my: 5 }}
             variant="h3"
             component="div"
           >
@@ -356,11 +371,53 @@ export default function FullScreenDialog({ children }: any) {
               secondary={"Current theme: " + global.theme}
             />
             <SettingsMenu
+              content={<TwoFactorAuth />}
+              icon="security"
+              primary={
+                <span id="twoFactorAuthSettings">
+                  Two factor authentication
+                  <Chip
+                    component="span"
+                    label="New"
+                    sx={{
+                      display: { xs: "none", sm: "unset" },
+                      height: "auto",
+                      ml: 2,
+                      py: 0.4,
+                      px: 0.7,
+                      background: "#B00200",
+                      color: "#fff",
+                    }}
+                  />
+                </span>
+              }
+              secondary={
+                <>
+                  {global.isOwner &&
+                  global.session.user["2faCode"] &&
+                  global.session.user["2faCode"] === "false" ? (
+                    <span style={{ color: "red" }}>
+                      Your account is at greater risk because 2-factor auth
+                      isn&rsquo;t enabled!
+                      <br />
+                    </span>
+                  ) : (
+                    ""
+                  )}
+                  2FA is currently{" "}
+                  {global.session.user["2faCode"] &&
+                  global.session.user["2faCode"] !== "false"
+                    ? "enabled"
+                    : "disabled"}
+                </>
+              }
+            />
+            <SettingsMenu
               id="financeSettingsTrigger"
               content={<FinanceSettings />}
               icon="payments"
               primary={<span id="financeSettingsTrigger">Finances</span>}
-              secondary={<>Budget set to ${global.session.user.budget}</>}
+              secondary={<>Goal: {global.session.user.financePlan}</>}
             />
             <SettingsMenu
               id="accountSettings"
@@ -385,8 +442,8 @@ export default function FullScreenDialog({ children }: any) {
               primary="Notifications"
               secondary={
                 <>
-                  If an item's quantity is {global.session.user.notificationMin}{" "}
-                  or less
+                  If an item&apos;s quantity is{" "}
+                  {global.session.user.notificationMin} or less
                 </>
               }
             />
@@ -402,26 +459,25 @@ export default function FullScreenDialog({ children }: any) {
               primary="App"
               secondary={"Coming soon"}
             />
-            <SettingsMenu
-              content={<Sessions />}
-              icon="history"
-              primary="Sessions"
-              secondary={<>Accessing on {window.navigator.platform}</>}
-            />
-            <SettingsMenu
-              content={<Rooms />}
-              icon="pin_drop"
-              primary="Rooms"
-              secondary={"10 rooms"}
-            />
+            {global.session.user.studentMode === false && (
+              <SettingsMenu
+                content={<Rooms />}
+                icon="pin_drop"
+                primary={<span id="roomsTrigger">Rooms</span>}
+                secondary={"10 rooms"}
+              />
+            )}
             <SettingsMenu
               content={<Sync />}
               icon="sync"
               primary="Sync"
-              secondary={"Pair your account and share inventory"}
+              secondary={
+                <span id="syncTrigger">
+                  Invite others to your home and sync inventory, lists, etc.
+                </span>
+              }
             />
             <Divider sx={{ mb: 1 }} />
-
             <Logout />
             <ListItem
               button

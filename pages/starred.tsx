@@ -13,7 +13,9 @@ function Items() {
       fetch("https://api.smartlist.tech/v2/items/starred/", {
         method: "POST",
         body: new URLSearchParams({
-          token: global.session && global.session.accessToken,
+          token:
+            global.session &&
+            (global.session.user.SyncToken || global.session.accessToken),
         }),
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       }).then((res) => res.json())
@@ -53,8 +55,15 @@ function Items() {
 export default function Render() {
   return (
     <Box sx={{ p: 3 }}>
-      <Typography sx={{ mb: 2 }} variant="h5">
-        Starred items
+      <Typography
+        variant="h4"
+        sx={{
+          my: { xs: 12, sm: 4 },
+          fontWeight: "700",
+          textAlign: { xs: "center", sm: "left" },
+        }}
+      >
+        Starred
       </Typography>
       <Masonry columns={{ xs: 1, sm: 3 }} spacing={{ xs: 0, sm: 2 }}>
         <Items />

@@ -13,6 +13,7 @@ import { AppsMenu } from "./AppsMenu";
 import { NotificationsMenu } from "./Notifications";
 import { ProfileMenu } from "./Profile";
 import { SearchPopup } from "./SearchPopup";
+import { InviteButton } from "./InviteButton";
 
 function ElevationScroll(props: any) {
   const { children, window } = props;
@@ -23,13 +24,9 @@ function ElevationScroll(props: any) {
   });
   useEffect(() => {
     if (document) {
-      //alert(trigger?"+":"-")
       document
         .querySelector(`meta[name="theme-color"]`)!
-        .setAttribute(
-          "content",
-          trigger ? colors[global.themeColor]["100"] : "#fff"
-        );
+        .setAttribute("content", trigger ? colors[themeColor]["100"] : "#fff");
     }
   });
   return React.cloneElement(children, {
@@ -46,6 +43,10 @@ function ElevationScroll(props: any) {
             global.theme === "dark"
               ? "rgba(57, 57, 71, .7)"
               : hexToRgba(colors[global.themeColor]["100"], 0.7),
+
+          ["@supports not (backdrop-filter: blur(20px))"]: {
+            background: colors[themeColor][100],
+          },
         }
       : {
           color: global.theme === "dark" ? "white" : "black",
@@ -62,120 +63,44 @@ function ElevationScroll(props: any) {
   });
 }
 
-export function Navbar({ handleDrawerToggle }: any): JSX.Element {
+export function Navbar(): JSX.Element {
+  const [syncedHouseName, setSyncedHouseName] = React.useState<string>("false");
+  global.setSyncedHouseName = setSyncedHouseName;
+  global.syncedHouseName = syncedHouseName;
+
   return (
     <ElevationScroll>
       <AppBar elevation={0} position="fixed">
         <Toolbar>
-          {/* <Tooltip title="Menu" placement="bottom-start">
-            {global.session ? (
-              <IconButton
-                color="inherit"
-                aria-label="open drawer."
-                disableRipple
-                edge="start"
-                size="large"
-                onClick={() => handleDrawerToggle(true)}
-                sx={{
-                  transition: "none",
-                  mr: 2,
-                  display: { md: "none" },
-                  color:
-                    global.theme === "dark" ? "hsl(240, 11%, 90%)" : "#606060",
-                  "&:hover": {
-                    background: "rgba(200,200,200,.3)",
-                    color:
-                      global.theme === "dark" ? "hsl(240, 11%, 95%)" : "#000",
-                  },
-                  "&:focus-within": {
-                    background:
-                      (global.theme === "dark"
-                        ? colors[themeColor]["900"]
-                        : colors[themeColor]["50"]) + "!important",
-                    color:
-                      global.theme === "dark" ? "hsl(240, 11%, 95%)" : "#000",
-                  },
-                }}
-              >
-                <span className="material-symbols-rounded">menu</span>
-              </IconButton>
-            ) : (
-              <Skeleton
-                sx={{ mr: 2 }}
-                variant="circular"
-                width={40}
-                height={40}
-                animation="wave"
-              />
-            )}
-          </Tooltip> */}
-
           <Typography
             variant="h6"
-            sx={{ flexGrow: 1, fontWeight: "600", ml: 1 }}
+            sx={{
+              flexGrow: 1,
+              fontWeight: "600",
+              display: "flex",
+              alignItems: "center",
+            }}
             noWrap
           >
-            {global.session ? (
+            {global.session.user.SyncToken == false ||
+            !global.session.user.SyncToken ? (
               global.session.user.houseName || "Smartlist"
             ) : (
-              <Skeleton
-                animation="wave"
-                width={200}
-                sx={{ maxWidth: "20vw" }}
-              />
-            )}
-          </Typography>
-          <SearchPopup
-            content={
-              <Tooltip title="Jump to">
-                {global.session ? (
-                  <IconButton
-                    color="inherit"
-                    disableRipple
-                    edge="end"
-                    size="large"
-                    sx={{
-                      transition: "none",
-                      mr: 1,
-                      color:
-                        global.theme === "dark"
-                          ? "hsl(240, 11%, 90%)"
-                          : "#606060",
-                      "&:hover": {
-                        background: "rgba(200,200,200,.3)",
-                        color:
-                          global.theme === "dark"
-                            ? "hsl(240, 11%, 95%)"
-                            : "#000",
-                      },
-                      "&:focus-within": {
-                        background:
-                          (global.theme === "dark"
-                            ? colors[themeColor]["900"]
-                            : colors[themeColor]["50"]) + "!important",
-                        color:
-                          global.theme === "dark"
-                            ? "hsl(240, 11%, 95%)"
-                            : "#000",
-                      },
-                    }}
-                  >
-                    <span className="material-symbols-rounded">
-                      electric_bolt
-                    </span>
-                  </IconButton>
-                ) : (
+              <>
+                {syncedHouseName === "false" ? (
                   <Skeleton
-                    sx={{ mr: 2 }}
-                    variant="circular"
-                    width={40}
-                    height={40}
                     animation="wave"
+                    width={200}
+                    sx={{ maxWidth: "20vw" }}
                   />
+                ) : (
+                  <>{syncedHouseName}</>
                 )}
-              </Tooltip>
-            }
-          />
+              </>
+            )}
+            <InviteButton />
+          </Typography>
+
           <NotificationsMenu>
             <Tooltip title="Notifications">
               {global.session ? (
@@ -219,6 +144,44 @@ export function Navbar({ handleDrawerToggle }: any): JSX.Element {
               )}
             </Tooltip>
           </NotificationsMenu>
+          <SearchPopup
+            content={
+              <Tooltip title="Jump to">
+                <IconButton
+                  color="inherit"
+                  id="searchTrigger1"
+                  disableRipple
+                  edge="end"
+                  size="large"
+                  sx={{
+                    transition: "none",
+                    mr: 1,
+                    color:
+                      global.theme === "dark"
+                        ? "hsl(240, 11%, 90%)"
+                        : "#606060",
+                    "&:hover": {
+                      background: "rgba(200,200,200,.3)",
+                      color:
+                        global.theme === "dark" ? "hsl(240, 11%, 95%)" : "#000",
+                    },
+                    "&:focus-within": {
+                      background:
+                        (global.theme === "dark"
+                          ? colors[themeColor]["900"]
+                          : colors[themeColor]["50"]) + "!important",
+                      color:
+                        global.theme === "dark" ? "hsl(240, 11%, 95%)" : "#000",
+                    },
+                  }}
+                >
+                  <span className="material-symbols-rounded">
+                    electric_bolt
+                  </span>
+                </IconButton>
+              </Tooltip>
+            }
+          />
           <Box sx={{ display: { sm: "block", xs: "none" } }}>
             <AppsMenu />
           </Box>

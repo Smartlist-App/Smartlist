@@ -6,7 +6,7 @@ import ListItemText from "@mui/material/ListItemText";
 import * as React from "react";
 
 // Generates a list item for shopping list / todo list
-export function GenerateListItem({ title, id }: any) {
+export function GenerateListItem({ items, setItems, title, id }: any) {
   const [checked, setChecked] = React.useState<boolean>(false);
   const [deleted, setDeleted] = React.useState<boolean>(false);
 
@@ -14,24 +14,38 @@ export function GenerateListItem({ title, id }: any) {
     fetch("https://api.smartlist.tech/v2/lists/delete-item/", {
       method: "POST",
       body: new URLSearchParams({
-        token: global.session && global.session.accessToken,
+        token:
+          global.session &&
+          (global.session.user.SyncToken || global.session.accessToken),
         id: id,
       }),
     });
+
     setDeleted(true);
+    setItems(items.filter((item: any) => item.id !== id));
   };
   return (
     <Collapse in={!deleted}>
       <ListItemButton
+        disableRipple
         key={id.toString()}
-        sx={{ py: 0, borderRadius: 3, transition: { sm: "none" } }}
+        sx={{
+          py: 0,
+          borderRadius: 3,
+          transition: "transform .2s",
+          "&:active": {
+            transition: "none",
+            transform: "scale(.97)",
+            background: "rgba(200,200,200,.3)",
+          },
+        }}
         dense
         onClick={() => {
           deleteItem(id);
           setChecked(true);
         }}
       >
-        <ListItemIcon>
+        <ListItemIcon sx={{ pointerEvents: "none " }}>
           <Checkbox
             onClick={() => {
               deleteItem(id);

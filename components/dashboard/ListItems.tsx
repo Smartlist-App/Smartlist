@@ -1,16 +1,15 @@
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Skeleton from "@mui/material/Skeleton";
-import Typography from "@mui/material/Typography";
-import React from "react";
-import useFetch from "react-fetch-hook";
-import { GenerateListItem } from "./GenerateListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import Skeleton from "@mui/material/Skeleton";
+import Typography from "@mui/material/Typography";
 import { useState } from "react";
+import useFetch from "react-fetch-hook";
 import { CreateListModal } from "../AddPopup/CreateListModal";
+import { GenerateListItem } from "./GenerateListItem";
 
 function GenerateData({ data, parent, emptyImage, emptyText, title }: any) {
   const [items, setItems] = useState<any>(data.data);
@@ -18,29 +17,45 @@ function GenerateData({ data, parent, emptyImage, emptyText, title }: any) {
   return (
     <>
       {items.map((list: Object, id: number) => (
-        <GenerateListItem {...list} key={id.toString()} />
+        <GenerateListItem
+          {...list}
+          key={id.toString()}
+          items={items}
+          setItems={setItems}
+        />
       ))}
-      <CreateListModal
-        parent={parent.toString()}
-        title={"item"}
-        items={items}
-        setItems={setItems}
-      >
-        <ListItemButton
-          sx={{ py: 0, borderRadius: 3, transition: "none" }}
-          dense
+      {items.length < 20 && (
+        <CreateListModal
+          parent={parent.toString()}
+          items={items}
+          setItems={setItems}
         >
-          <ListItemIcon>
-            <span
-              style={{ marginLeft: "-2px" }}
-              className="material-symbols-rounded"
-            >
-              add_circle
-            </span>
-          </ListItemIcon>
-          <ListItemText sx={{ my: 1.4 }} primary={"New list item"} />
-        </ListItemButton>
-      </CreateListModal>
+          <ListItemButton
+            disableRipple
+            sx={{
+              py: 0,
+              borderRadius: 3,
+              transition: "transform .2s",
+              "&:active": {
+                transition: "none",
+                transform: "scale(.97)",
+                background: "rgba(200,200,200,.3)",
+              },
+            }}
+            dense
+          >
+            <ListItemIcon>
+              <span
+                style={{ marginLeft: "-2px" }}
+                className="material-symbols-outlined"
+              >
+                add_circle
+              </span>
+            </ListItemIcon>
+            <ListItemText sx={{ my: 1.4 }} primary={"New list item"} />
+          </ListItemButton>
+        </CreateListModal>
+      )}
       {items.length === 0 && (
         <Box sx={{ textAlign: "center" }}>
           <picture>
@@ -69,20 +84,21 @@ export function ListItems({
   emptyText: any;
 }) {
   const { data, isLoading }: any = useFetch(
-    "https://api.smartlist.tech/v2/lists/fetch/",
-    {
-      method: "POST",
-      body: new URLSearchParams({
-        token: global.session && global.session.accessToken,
+    "/api/lists/items?" +
+      new URLSearchParams({
+        token:
+          global.session &&
+          (global.session.user.SyncToken || global.session.accessToken),
         parent: parent,
       }),
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    {
+      method: "POST",
     }
   );
   if (isLoading)
     return (
       <Skeleton
-        height={200}
+        height={300}
         animation="wave"
         variant="rectangular"
         sx={{ borderRadius: "28px" }}

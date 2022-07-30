@@ -1,50 +1,49 @@
-import * as React from "react";
-
-import Box from "@mui/material/Box";
-import SwipeableDrawer from "@mui/material/SwipeableDrawer";
-import Typography from "@mui/material/Typography";
-import Tooltip from "@mui/material/Tooltip";
 import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
+import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
-import ListItemText from "@mui/material/ListItemText";
 import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
 import Skeleton from "@mui/material/Skeleton";
+import SwipeableDrawer from "@mui/material/SwipeableDrawer";
+import Toolbar from "@mui/material/Toolbar";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
+import * as React from "react";
 import useSWR from "swr";
 import { neutralizeBack, revivalBack } from "../history-control";
 
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
-function hasNumber(myString) {
-  return /\d/.test(myString);
-}
 
 function NotificationsList() {
-  const url = "https://api.smartlist.tech/v2/items/list/";
+  const url =
+    "/api/inventory?" +
+    new URLSearchParams({
+      limit: "500",
+      token:
+        global.session &&
+        (global.session.user.SyncToken || global.session.accessToken),
+    });
 
   const { data, error } = useSWR(url, () =>
     fetch(url, {
       method: "POST",
-      body: new URLSearchParams({
-        token: global.session.accessToken,
-        limit: "500",
-        room: "null",
-      }),
     }).then((res) => res.json())
   );
   if (error)
     return (
       <div>
         Yikes! An error occured while trying to load your inbox. Try reloading
-        htis page
+        this page
       </div>
     );
   if (!data)
     return (
       <>
-        {[...new Array(25)].map(() => (
+        {[...new Array(25)].map((_: any, id: number) => (
           <Skeleton
+            key={id.toString()}
             variant="rectangular"
             animation="wave"
             sx={{ height: 100, borderRadius: 5, mt: 2 }}
@@ -55,15 +54,16 @@ function NotificationsList() {
 
   return (
     <>
-      {data.data.map((item) => {
+      {data.data.map((item: any, id: number) => {
         if (
-          parseInt(item.amount.replace(/[^\d]/g, ""), 100) > 3 ||
-          item.amount.includes("In stock") ||
-          !hasNumber(item.amount)
+          parseInt(item.amount.replace(/[^\d]/g, ""), 100) <
+            global.session.user.notificationMin ||
+          item.amount.includes("In stock")
         )
           return "";
         return (
           <ListItem
+            key={id.toString()}
             sx={{
               mb: 2,
               borderRadius: 5,
@@ -78,7 +78,7 @@ function NotificationsList() {
               primary={capitalizeFirstLetter(item.room)}
               secondary={
                 <>
-                  You're running out of {item.title} <br />
+                  You&apos;re running out of {item.title} <br />
                   Current quantity: {item.amount || "No quantity specified"}
                 </>
               }

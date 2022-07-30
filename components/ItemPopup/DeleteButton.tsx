@@ -2,7 +2,6 @@ import * as colors from "@mui/material/colors";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import dayjs from "dayjs";
-import React from "react";
 
 export function DeleteButton({
   id,
@@ -31,19 +30,23 @@ export function DeleteButton({
             background:
               (global.theme === "dark"
                 ? colors[themeColor]["900"]
-                : colors[themeColor]["50"]) + "!important",
+                : colors[themeColor]["100"]) + "!important",
             color: global.theme === "dark" ? "hsl(240, 11%, 95%)" : "#000",
           },
         }}
         onClick={() => {
-          fetch("https://api.smartlist.tech/v2/items/delete/", {
-            method: "POST",
-            body: new URLSearchParams({
-              token: global.session && global.session.accessToken,
-              id: id.toString(),
-              date: dayjs().format("YYYY-MM-DD HH:mm:ss"),
-            }),
-          });
+          fetch(
+            "/api/inventory/trash?" +
+              new URLSearchParams({
+                token:
+                  global.session.user.SyncToken || global.session.accessToken,
+                id: id.toString(),
+                lastUpdated: dayjs().format("YYYY-MM-DD HH:mm:ss"),
+              }),
+            {
+              method: "POST",
+            }
+          );
           setOpen(true);
           setDeleted(true);
           setDrawerState(false);

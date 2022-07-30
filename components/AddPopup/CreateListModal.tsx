@@ -1,57 +1,37 @@
 import LoadingButton from "@mui/lab/LoadingButton";
-import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import * as colors from "@mui/material/colors";
 import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 import TextField from "@mui/material/TextField";
 import { useFormik } from "formik";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { neutralizeBack, revivalBack } from "../history-control";
+import { Puller } from "../Puller";
 
-function Puller() {
-  return (
-    <Box
-      className="puller"
-      sx={{
-        width: "50px",
-        backgroundColor: global.theme === "dark" ? "#505050" : "#eee",
-        height: "7px",
-        margin: "auto",
-        borderRadius: 9,
-        mt: 1,
-        position: "absolute",
-        left: "50%",
-        transform: "translateX(-50%)",
-        display: "inline-block",
-      }}
-    />
-  );
-}
-
-export function CreateListModal({
-  children,
-  parent,
-  title,
-  items,
-  setItems,
-}: any) {
+export function CreateListModal({ children, parent, items, setItems }: any) {
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [customParent, setCustomParent] = useState(parent);
+
   const formik = useFormik({
     initialValues: {
       name: "",
     },
     onSubmit: (values: { name: string }) => {
-      fetch("https://api.smartlist.tech/v2/lists/create-item/", {
-        method: "POST",
-        body: new URLSearchParams({
-          token: global.session ? global.session.accessToken : undefined,
-          parent: parent,
-          title: values.name,
-          description: "",
-        }),
-      })
+      fetch(
+        "/api/lists/create-item?" +
+          new URLSearchParams({
+            token: global.session.user.SyncToken || global.session.accessToken,
+            parent: customParent,
+            title: values.name,
+            description: "",
+          }),
+        {
+          method: "POST",
+        }
+      )
         .then((res) => res.json())
         .then((res) => {
           setItems([...items, res.data]);
@@ -67,6 +47,7 @@ export function CreateListModal({
   React.useEffect(() => {
     open ? neutralizeBack(() => setOpen(false)) : revivalBack();
   });
+
   return (
     <>
       <SwipeableDrawer
@@ -77,13 +58,15 @@ export function CreateListModal({
         }}
         disableSwipeToOpen={true}
         PaperProps={{
+          elevation: 0,
           sx: {
+            background: colors[themeColor][50],
             width: {
               sm: "50vw",
             },
             maxWidth: "600px",
             maxHeight: "80vh",
-            borderRadius: "40px 40px 0 0",
+            borderRadius: "30px 30px 0 0",
             mx: "auto",
             ...(global.theme === "dark" && {
               background: "hsl(240, 11%, 25%)",
@@ -98,9 +81,6 @@ export function CreateListModal({
       >
         <Puller />
         <form onSubmit={formik.handleSubmit}>
-          <DialogTitle sx={{ mt: 2, textAlign: "center" }}>
-            Create {title}
-          </DialogTitle>
           <DialogContent>
             <TextField
               inputRef={(input) =>
@@ -116,6 +96,32 @@ export function CreateListModal({
               onChange={formik.handleChange}
               value={formik.values.name}
             />
+            {customParent === "-1" &&
+              (formik.values.name.toLowerCase().includes("get ") ||
+                formik.values.name.toLowerCase().includes("bring ") ||
+                formik.values.name.toLowerCase().includes("shop ")) && (
+                <Button
+                  variant="outlined"
+                  sx={{ borderWidth: "2px!important", mt: 2.5 }}
+                  size="small"
+                  onClick={() => setCustomParent("-2")}
+                >
+                  Add this to your shopping list instead?
+                </Button>
+              )}
+            {customParent === "-2" &&
+              (formik.values.name.toLowerCase().includes("pay ") ||
+                formik.values.name.toLowerCase().includes("fix ") ||
+                formik.values.name.toLowerCase().includes("throw ")) && (
+                <Button
+                  variant="outlined"
+                  sx={{ borderWidth: "2px!important", mt: 2.5 }}
+                  size="small"
+                  onClick={() => setCustomParent("-1")}
+                >
+                  Add this to your to do list instead?
+                </Button>
+              )}
             <LoadingButton
               size="large"
               disableElevation
@@ -136,7 +142,14 @@ export function CreateListModal({
           </DialogContent>
         </form>
       </SwipeableDrawer>
-      <div onClick={() => setOpen(true)}>{children}</div>
+      <div
+        onClick={() => {
+          setOpen(true);
+          setCustomParent(parent);
+        }}
+      >
+        {children}
+      </div>
     </>
   );
 }

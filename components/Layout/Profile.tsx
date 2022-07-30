@@ -19,7 +19,7 @@ export function ProfileMenu(props: any) {
           open
             ? global.theme === "dark"
               ? "hsl(240, 11%, 10%)"
-              : "#808080"
+              : "#cccccc"
             : global.theme === "dark"
             ? "hsl(240, 11%, 10%)"
             : "#fff"
@@ -53,6 +53,7 @@ export function ProfileMenu(props: any) {
           sx={{
             fontSize: "15px",
             bgcolor: colors[themeColor][200],
+            borderRadius: 4.5,
             transform: "scale(1.2)",
           }}
           alt="Profie picture"

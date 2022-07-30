@@ -2,21 +2,22 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
-import * as React from "react";
 import useSWR from "swr";
-import Item from "../../components/ItemPopup";
+import Item from "../ItemPopup";
 
 export function RecentItems() {
-  const url = "https://api.smartlist.tech/v2/items/list/";
+  const url =
+    "/api/inventory?" +
+    new URLSearchParams({
+      limit: "7",
+      token:
+        global.session &&
+        (global.session.user.SyncToken || global.session.accessToken),
+    });
   const { data, error } = useSWR(url, () =>
     fetch(url, {
       method: "POST",
-      body: new URLSearchParams({
-        room: "null",
-        limit: "7",
-        token: global.session && global.session.accessToken
-      })
-    }).then(res => res.json())
+    }).then((res) => res.json())
   );
 
   if (error) return <div>failed to load</div>;
@@ -37,7 +38,7 @@ export function RecentItems() {
         borderRadius: "28px",
         background: global.theme === "dark" ? "hsl(240, 11%, 13%)" : "#eee",
         boxShadow: 0,
-        p: 1
+        p: 1,
       }}
     >
       <CardContent>

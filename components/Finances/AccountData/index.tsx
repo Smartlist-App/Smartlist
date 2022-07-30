@@ -1,7 +1,6 @@
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
-import React from "react";
 import useSWR from "swr";
 import { AccountHeader } from "./AccountHeader";
 import { Goal } from "./Goal";
@@ -55,13 +54,14 @@ export function AccountData({ setOpen, scrollTop, account }: any) {
               background: "rgba(200,200,200,.3)",
             }}
           >
-            You haven't set any goals yet.
+            You haven&apos;t set any goals yet.
           </Box>
         )}
         {!data && (
           <>
-            {[...new Array(10)].map(() => (
+            {[...new Array(10)].map((_: any, id: number) => (
               <Skeleton
+                key={id.toString()}
                 variant="rectangular"
                 height={150}
                 sx={{ borderRadius: 4, mt: 2 }}
@@ -71,8 +71,9 @@ export function AccountData({ setOpen, scrollTop, account }: any) {
           </>
         )}
         {data &&
-          data.data.map((goal: any) => (
+          data.data.map((goal: any, id: number) => (
             <Goal
+              key={id.toString()}
               scrollTop={scrollTop}
               id={goal.id}
               image={goal.image}

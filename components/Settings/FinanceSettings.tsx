@@ -7,16 +7,13 @@ import ListSubheader from "@mui/material/ListSubheader";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import TextField from "@mui/material/TextField";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { updateSettings } from "./updateSettings";
 
 export default function AppearanceSettings() {
   const [financePlan, setFinancePlan] = useState<
     "short-term" | "medium-term" | "long-term"
   >(global.session && global.session.user.financePlan);
-  useEffect(() => {
-    updateSettings("financePlan", financePlan);
-  }, [financePlan]);
   return (
     <>
       <Box
@@ -52,13 +49,20 @@ export default function AppearanceSettings() {
               n: "Long term",
               d: "Save money for for education/retirement in a lenient period of time",
             },
-          ].map((plan: any) => (
+          ].map((plan: any, id: number) => (
             <ListItem
-              onClick={() => setFinancePlan(plan.s)}
+              key={id.toString()}
+              onClick={() => {
+                setFinancePlan(plan.s);
+                updateSettings("financePlan", financePlan);
+              }}
               secondaryAction={
                 <Radio
                   edge="end"
-                  onChange={() => setFinancePlan(plan.s)}
+                  onChange={() => {
+                    setFinancePlan(plan.s);
+                    updateSettings("financePlan", financePlan);
+                  }}
                   checked={financePlan === plan.s}
                 />
               }

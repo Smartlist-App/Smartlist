@@ -7,16 +7,14 @@ import Radio from "@mui/material/Radio";
 import Slider from "@mui/material/Slider";
 import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { updateSettings } from "./updateSettings";
 
 export default function AppearanceSettings() {
   const [mode, setMode] = useState<"personal" | "business">("personal");
-  const [studentMode, setStudentMode] = useState<boolean>(false);
-
-  useEffect(() => {
-    updateSettings("studentMode", studentMode ? "on" : "off");
-  }, [studentMode]);
+  const [studentMode, setStudentMode] = useState<boolean>(
+    global.session.user.studentMode
+  );
 
   return (
     <>
@@ -24,8 +22,8 @@ export default function AppearanceSettings() {
         sx={{
           py: 1,
           px: {
-            sm: 10
-          }
+            sm: 10,
+          },
         }}
       >
         <ListSubheader sx={{ background: "transparent" }}>
@@ -76,14 +74,15 @@ export default function AppearanceSettings() {
         {[
           {
             s: "personal",
-            n: "Personal"
+            n: "Personal",
           },
           {
             s: "business",
-            n: "Business"
-          }
-        ].map((plan: any) => (
+            n: "Business",
+          },
+        ].map((plan: any, id: number) => (
           <ListItem
+            key={id.toString()}
             onClick={() => {
               setMode(plan.s);
               updateSettings("purpose", plan.s);
@@ -109,16 +108,11 @@ export default function AppearanceSettings() {
           Student mode
         </ListSubheader>
         <ListItem
-          onClick={() => setStudentMode(!studentMode)}
-          secondaryAction={
-            <Switch
-              edge="end"
-              onChange={(e) => {
-                setStudentMode(!studentMode);
-              }}
-              checked={studentMode}
-            />
-          }
+          onClick={() => {
+            setStudentMode(!studentMode);
+            updateSettings("studentMode", studentMode ? "true" : "false");
+          }}
+          secondaryAction={<Switch edge="end" checked={studentMode} />}
           disablePadding
         >
           <ListItemButton sx={{ borderRadius: 4, transition: "none" }}>
@@ -136,7 +130,8 @@ export default function AppearanceSettings() {
                 fullWidth
                 variant="filled"
                 defaultValue={global.session && global.session.user.houseName}
-                label="What's your home's name?"
+                label="Home name / Family name / Address"
+                placeholder="1234 Rainbow Road"
                 onBlur={(e) => updateSettings("houseName", e.target.value)}
               />
             }
@@ -148,7 +143,9 @@ export default function AppearanceSettings() {
             secondary={
               <Slider
                 aria-label="How many people do you live with?"
-                defaultValue={global.session && global.session.user.familyCount}
+                defaultValue={
+                  global.session && parseInt(global.session.user.familyCount)
+                }
                 valueLabelDisplay="auto"
                 step={1}
                 marks
